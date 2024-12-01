@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 fn main() {
     let input = include_str!("input.txt");
     let output = solve(input);
@@ -6,26 +8,24 @@ fn main() {
 
 fn solve(input: &str) -> usize {
     let mut left = vec![];
-    let mut right = vec![];
+    let mut right = HashMap::<usize, usize>::new();
     for line in input.lines() {
         let (l, r) = line.split_once("   ").unwrap();
         let l = l.parse::<usize>().unwrap();
         let r = r.parse::<usize>().unwrap();
         left.push(l);
-        right.push(r);
+
+        *right.entry(r).or_default() += 1;
     }
-    left.sort_unstable();
-    right.sort_unstable();
 
     left.into_iter()
-        .zip(right.into_iter())
-        .map(|(l, r)| l.abs_diff(r))
+        .map(|l| l * right.get(&l).copied().unwrap_or_default())
         .sum()
 }
 
 #[test]
 fn test() {
-    let input = include_str!("input1_test.txt");
+    let input = include_str!("input2_test.txt");
     let output = solve(input);
-    assert_eq!(output, 11);
+    assert_eq!(output, 31);
 }
