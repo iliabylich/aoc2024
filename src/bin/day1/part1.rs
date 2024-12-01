@@ -18,7 +18,7 @@ fn solve(input: &str) -> usize {
     right.sort_unstable();
 
     left.into_iter()
-        .zip(right.into_iter())
+        .zip(right)
         .map(|(l, r)| l.abs_diff(r))
         .sum()
 }
