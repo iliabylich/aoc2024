@@ -23,5 +23,9 @@ path = "src/bin/day2/part2.rs"
 name = "31"
 path = "src/bin/day3/part1.rs"
 
+[[bin]]
+name = "32"
+path = "src/bin/day3/part2.rs"
+
 [dependencies]
 regex = "1.11.1"
