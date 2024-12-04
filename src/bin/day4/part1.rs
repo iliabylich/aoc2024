@@ -147,7 +147,7 @@ fn solve(input: &[u8]) -> usize {
 
 #[test]
 fn test() {
-    let input = include_bytes!("input1_test.txt");
+    let input = include_bytes!("input_test.txt");
     let output = solve(input);
     assert_eq!(output, 18);
 }
