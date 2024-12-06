@@ -1,3 +1,4 @@
+use rayon::prelude::*;
 use std::collections::HashSet;
 
 fn main() {
@@ -24,7 +25,7 @@ impl From<u8> for Cell {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Matrix {
     rows: Vec<Vec<Cell>>,
     rows_count: usize,
@@ -215,13 +216,15 @@ fn print(matrix: &Matrix, location: Location) {
     println!("\n\n");
 }
 
-fn solve(input: &[u8]) -> usize {
-    let (mut matrix, mut location) = Matrix::parse(input);
+fn is_loop(mut matrix: Matrix, mut location: Location, rowno: usize, colno: usize) -> bool {
+    if location.row as usize == rowno && location.col as usize == colno {
+        // can't have at the starting point
+        return false;
+    }
+    matrix.rows[rowno][colno] = Cell::Blocked;
 
     let mut visited = HashSet::new();
     visited.insert(location);
-
-    // print(&matrix, location);
 
     while let Some((row, col, dir)) = location.next(&matrix) {
         matrix.visit(row, col);
@@ -234,27 +237,41 @@ fn solve(input: &[u8]) -> usize {
             break;
         }
         if !visited.insert(location) {
-            panic!("found a loop");
+            // LOOP
+            return true;
         }
         // print!("{}[2J", 27 as char);
         // print(&matrix, location);
         // std::thread::sleep(std::time::Duration::from_millis(10));
     }
 
-    matrix
-        .rows
-        .iter()
-        .map(|row| {
-            row.iter()
-                .filter(|cell| matches!(cell, Cell::Visited))
-                .count()
+    false
+}
+
+fn solve(input: &[u8]) -> usize {
+    let (matrix, location) = Matrix::parse(input);
+
+    let mut candidates = vec![];
+    for row in 0..matrix.rows_count {
+        for col in 0..matrix.cols_count {
+            candidates.push((row, col));
+        }
+    }
+
+    let locs = candidates
+        .par_iter()
+        .filter(|(row, col)| {
+            let matrix = matrix.clone();
+            is_loop(matrix, location, *row, *col)
         })
-        .sum::<usize>()
+        .collect::<Vec<_>>();
+
+    locs.len()
 }
 
 #[test]
 fn test() {
     let input = include_bytes!("input_test.txt");
     let output = solve(input);
-    assert_eq!(output, 41);
+    assert_eq!(output, 6);
 }
