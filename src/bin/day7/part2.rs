@@ -8,6 +8,7 @@ fn main() {
 enum Operator {
     Plus,
     Multiply,
+    Or,
 }
 
 #[derive(Debug)]
@@ -44,6 +45,7 @@ impl Equation {
             match op {
                 Operator::Plus => result += *number,
                 Operator::Multiply => result *= number,
+                Operator::Or => result = format!("{}{}", result, number).parse::<usize>().unwrap(),
             }
         }
         result == self.total
@@ -55,7 +57,7 @@ fn all_combinations(n: usize, mut buf: Vec<Operator>, out: &mut Vec<Vec<Operator
         return;
     }
 
-    for next_operator in [Operator::Multiply, Operator::Plus] {
+    for next_operator in [Operator::Multiply, Operator::Plus, Operator::Or] {
         buf.push(next_operator);
         if buf.len() == n {
             out.push(buf.clone());
@@ -87,5 +89,5 @@ fn solve(input: &str) -> usize {
 fn test() {
     let input = include_str!("input_test.txt");
     let output: usize = solve(input);
-    assert_eq!(output, 3749);
+    assert_eq!(output, 11387);
 }
