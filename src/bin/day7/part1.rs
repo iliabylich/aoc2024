@@ -68,7 +68,7 @@ fn all_combinations(n: usize, mut buf: Vec<Operator>, out: &mut Vec<Vec<Operator
 fn solve(input: &str) -> usize {
     let equations = input
         .trim()
-        .split("\n")
+        .split('\n')
         .map(Equation::parse)
         .collect::<Vec<_>>();
 
