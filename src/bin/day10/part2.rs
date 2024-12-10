@@ -1,5 +1,3 @@
-use std::collections::HashSet;
-
 fn main() {
     let input = include_str!("input.txt");
     let output = solve(input);
@@ -128,21 +126,17 @@ fn print_paths(start: Location, paths: &[Vec<Location>], matrix: &Matrix) {
 
 fn solve(input: &str) -> usize {
     let matrix = Matrix::parse(input);
-    let mut set = HashSet::new();
+    let mut out = 0;
     for start in matrix.zeroes() {
         let paths = matrix.paths_to_nines(start);
-        for path in paths {
-            let end = *path.last().unwrap();
-            set.insert((start, end));
-        }
-        // print_paths(start, &paths, &matrix);
+        out += paths.len();
     }
-    set.len()
+    out
 }
 
 #[test]
 fn test() {
     let input = include_str!("input_test.txt");
     let output = solve(input);
-    assert_eq!(output, 36);
+    assert_eq!(output, 81);
 }
