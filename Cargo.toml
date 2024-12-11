@@ -87,6 +87,10 @@ path = "src/bin/day10/part2.rs"
 name = "111"
 path = "src/bin/day11/part1.rs"
 
+[[bin]]
+name = "112"
+path = "src/bin/day11/part2.rs"
+
 [dependencies]
 rayon = "1.10.0"
 regex = "1.11.1"
