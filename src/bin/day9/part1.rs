@@ -66,7 +66,6 @@ impl Filesystem {
 
         while left < right {
             self.blocks.swap(left, right);
-            // println!("{}", self);
 
             skip_left(&mut left, &self.blocks);
             skip_right(&mut right, &self.blocks);
@@ -100,7 +99,6 @@ impl std::fmt::Display for Filesystem {
 
 fn solve(input: &str) -> usize {
     let mut fs = Filesystem::parse(input);
-    // println!("{}", fs);
 
     fs.defragment();
     fs.checksum()

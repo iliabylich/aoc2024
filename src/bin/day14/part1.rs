@@ -78,27 +78,6 @@ impl Robot {
     }
 }
 
-#[allow(dead_code)]
-fn print_robots(robots: &[Robot], rows_count: u64, cols_count: u64, seconds: u64) {
-    for row in 0..rows_count {
-        for col in 0..cols_count {
-            let n = robots
-                .iter()
-                .filter(|r| {
-                    let loc = r.location_after_seconds(seconds);
-                    loc.row == row as i64 && loc.col == col as i64
-                })
-                .count();
-            if n == 0 {
-                print!(".")
-            } else {
-                print!("{n}");
-            }
-        }
-        println!();
-    }
-}
-
 struct Quadrant {
     rows_spawn: RangeInclusive<u64>,
     cols_spawn: RangeInclusive<u64>,
@@ -181,10 +160,6 @@ fn solve(input: &str, rows_count: u64, cols_count: u64) -> u64 {
             }
         }
     }
-    // for seconds in 0..10 {
-    //     print_robots(&robots, rows_count, cols_count, seconds);
-    //     println!()
-    // }
 
     count[0] * count[1] * count[2] * count[3]
 }

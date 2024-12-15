@@ -135,7 +135,6 @@ impl Filesystem {
 
         for block_idx in (0..=self.max_block_idx).rev() {
             if self.move_block(block_idx, &block_slots, &free_slots) {
-                // println!("{}", self);
                 (block_slots, free_slots) = self.split();
             }
         }
@@ -168,7 +167,6 @@ impl std::fmt::Display for Filesystem {
 
 fn solve(input: &str) -> usize {
     let mut fs = Filesystem::parse(input);
-    // println!("{:?}", fs);
 
     fs.defragment();
     fs.checksum()

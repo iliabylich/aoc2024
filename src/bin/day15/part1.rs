@@ -196,12 +196,9 @@ fn solve(input: &str) -> usize {
     let (matrix, insns) = input.split_once("\n\n").unwrap();
     let mut matrix = Matrix::parse(matrix);
 
-    // println!("{}", matrix);
-
     for dir in insns.bytes().filter_map(|b| Direction::try_from(b).ok()) {
         matrix.step(dir);
     }
-    // println!("{}", matrix);
 
     matrix.score()
 }

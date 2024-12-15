@@ -134,14 +134,13 @@ fn heuristic1(robots: &[Robot]) -> bool {
             .push(robot.current_location.row);
     }
 
-    for (key, mut value) in map.into_iter() {
+    for (_, mut value) in map.into_iter() {
         value.sort_unstable();
 
-        if let Some(seq) = value
+        if value
             .windows(10)
-            .find(|w| w.iter().zip(w.iter().skip(1)).all(|(a, b)| *a + 1 == *b))
+            .any(|w| w.iter().zip(w.iter().skip(1)).all(|(a, b)| *a + 1 == *b))
         {
-            println!("{key}: {:?}", seq);
             return true;
         }
     }
@@ -164,9 +163,6 @@ fn solve(input: &str, rows_count: u64, cols_count: u64) {
             robot.step();
         }
         seconds += 1;
-        if seconds % 1000 == 0 {
-            println!("{:?}", seconds);
-        }
 
         if !heuristic1(&robots) {
             continue;

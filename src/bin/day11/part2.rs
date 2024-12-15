@@ -117,9 +117,7 @@ impl Line {
 fn solve(input: &str) -> usize {
     let mut line = Line::parse(input);
 
-    for i in 0..75 {
-        println!("{i}: {:?}", line.len());
-
+    for _ in 0..75 {
         line = line.blink()
     }
 

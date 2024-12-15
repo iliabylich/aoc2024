@@ -272,35 +272,9 @@ fn optimize(sides: &mut HashSet<Side>) {
     }
 }
 
-#[allow(dead_code)]
-fn print_shapes(shapes: &[Shape], matrix: &Matrix) {
-    for shape in shapes {
-        let random_loc = *shape.locations.iter().next().unwrap();
-        println!("{}", matrix.get(random_loc).unwrap().2 as char);
-        println!(
-            "{:?}",
-            shape
-                .locations
-                .iter()
-                .map(|loc| format!(
-                    "({},{},{})",
-                    loc.row,
-                    loc.col,
-                    matrix.get(*loc).unwrap().2 as char
-                ))
-                .collect::<Vec<_>>()
-        );
-        println!("area: {:?}", shape.area());
-        println!("sides: {:?}", shape.sides());
-        println!("sides_count: {:?}", shape.sides_count());
-    }
-}
-
 fn solve(input: &str) -> usize {
     let matrix = Matrix::parse(input);
     let shapes = matrix.shapes();
-
-    // print_shapes(&shapes, &matrix);
 
     shapes.into_iter().map(|shape| shape.price()).sum()
 }

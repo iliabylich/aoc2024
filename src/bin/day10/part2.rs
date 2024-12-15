@@ -106,24 +106,6 @@ impl Matrix {
     }
 }
 
-#[allow(dead_code)]
-fn print_loc(loc: Location, matrix: &Matrix) {
-    print!("{}({},{})", matrix.get(loc).unwrap(), loc.row, loc.col);
-}
-
-#[allow(dead_code)]
-fn print_paths(start: Location, paths: &[Vec<Location>], matrix: &Matrix) {
-    print_loc(start, matrix);
-    println!(":");
-    for path in paths {
-        for loc in path {
-            print_loc(*loc, matrix);
-            print!(" -> ");
-        }
-        println!()
-    }
-}
-
 fn solve(input: &str) -> usize {
     let matrix = Matrix::parse(input);
     let mut out = 0;

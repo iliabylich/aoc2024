@@ -190,38 +190,11 @@ impl Location {
     }
 }
 
-#[allow(dead_code)]
-fn print(matrix: &Matrix, location: Location) {
-    println!("\n\n");
-    for (rowno, row) in matrix.rows.iter().enumerate() {
-        for (colno, col) in row.iter().enumerate() {
-            if location.row == rowno as isize && location.col == colno as isize {
-                match location.dir {
-                    Direction::Left => print!("<"),
-                    Direction::Up => print!("^"),
-                    Direction::Right => print!(">"),
-                    Direction::Down => print!("V"),
-                }
-            } else {
-                match col {
-                    Cell::Blocked => print!("#"),
-                    Cell::Empty => print!("."),
-                    Cell::Visited => print!("X"),
-                }
-            }
-        }
-        println!()
-    }
-    println!("\n\n");
-}
-
 fn solve(input: &[u8]) -> usize {
     let (mut matrix, mut location) = Matrix::parse(input);
 
     let mut visited = HashSet::new();
     visited.insert(location);
-
-    // print(&matrix, location);
 
     while let Some((row, col, dir)) = location.next(&matrix) {
         matrix.visit(row, col);
@@ -236,9 +209,6 @@ fn solve(input: &[u8]) -> usize {
         if !visited.insert(location) {
             panic!("found a loop");
         }
-        // print!("{}[2J", 27 as char);
-        // print(&matrix, location);
-        // std::thread::sleep(std::time::Duration::from_millis(10));
     }
 
     matrix

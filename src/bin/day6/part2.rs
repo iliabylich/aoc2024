@@ -191,31 +191,6 @@ impl Location {
     }
 }
 
-#[allow(dead_code)]
-fn print(matrix: &Matrix, location: Location) {
-    println!("\n\n");
-    for (rowno, row) in matrix.rows.iter().enumerate() {
-        for (colno, col) in row.iter().enumerate() {
-            if location.row == rowno as isize && location.col == colno as isize {
-                match location.dir {
-                    Direction::Left => print!("<"),
-                    Direction::Up => print!("^"),
-                    Direction::Right => print!(">"),
-                    Direction::Down => print!("V"),
-                }
-            } else {
-                match col {
-                    Cell::Blocked => print!("#"),
-                    Cell::Empty => print!("."),
-                    Cell::Visited => print!("X"),
-                }
-            }
-        }
-        println!()
-    }
-    println!("\n\n");
-}
-
 fn is_loop(mut matrix: Matrix, mut location: Location, rowno: usize, colno: usize) -> bool {
     if location.row as usize == rowno && location.col as usize == colno {
         // can't have at the starting point
@@ -240,9 +215,6 @@ fn is_loop(mut matrix: Matrix, mut location: Location, rowno: usize, colno: usiz
             // LOOP
             return true;
         }
-        // print!("{}[2J", 27 as char);
-        // print(&matrix, location);
-        // std::thread::sleep(std::time::Duration::from_millis(10));
     }
 
     false

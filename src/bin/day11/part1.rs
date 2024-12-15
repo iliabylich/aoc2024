@@ -28,9 +28,7 @@ fn solve(input: &str) -> usize {
     }
 
     let mut iteration = stones;
-    for i in 0..25 {
-        println!("{i}: {:?}", iteration.len());
-
+    for _ in 0..25 {
         let mut next = vec![];
         for stone in iteration {
             let (s1, s2) = stone.blink();
