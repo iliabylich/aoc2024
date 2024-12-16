@@ -119,6 +119,10 @@ path = "src/bin/day15/part1.rs"
 name = "152"
 path = "src/bin/day15/part2.rs"
 
+[[bin]]
+name = "161"
+path = "src/bin/day16/part1.rs"
+
 [dependencies]
 crossterm = "0.28.1"
 rayon = "1.10.0"
