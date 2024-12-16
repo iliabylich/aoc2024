@@ -1,4 +1,4 @@
-use std::collections::{HashMap, VecDeque};
+use std::collections::{HashMap, HashSet, VecDeque};
 
 fn main() {
     let input = include_str!("input.txt");
@@ -6,10 +6,16 @@ fn main() {
     println!("{}", output);
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
 struct Location {
     row: usize,
     col: usize,
+}
+
+impl std::fmt::Debug for Location {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "({}, {})", self.row, self.col)
+    }
 }
 
 impl Location {
@@ -151,7 +157,7 @@ impl Matrix {
         *self.data.get(loc.row).unwrap().get(loc.col).unwrap()
     }
 
-    fn siblings(&self, loc: Location, dir: Direction) -> Vec<(Location, Direction, usize)> {
+    fn moves(&self, loc: Location, dir: Direction) -> Vec<(Location, Direction, usize)> {
         let mut out = vec![];
 
         if let Some(next_loc) = self.try_move(loc, dir) {
@@ -160,29 +166,53 @@ impl Matrix {
 
         for turn in [Turn::Clockwise, Turn::Counterclockwise] {
             let next_dir = turn.transition(dir);
-            if let Some(next_loc) = self.try_move(loc, next_dir) {
-                out.push((next_loc, next_dir, 1001));
+            if self.try_move(loc, next_dir).is_some() {
+                out.push((loc, next_dir, 1000));
             }
         }
 
         out
     }
 
-    fn get_best_path(&self) -> usize {
+    fn get_best_paths(&self) -> HashSet<Location> {
         let mut queue = VecDeque::new();
-        queue.push_back((self.start_loc, Direction::Right, 0));
 
-        let mut best_score = BestScore::new(self.start_loc);
+        let initial = (self.start_loc, Direction::Right);
+        queue.push_back((vec![initial], 0));
+        let mut best_score = BestScore::new(initial);
 
-        while let Some((loc, dir, score)) = queue.pop_front() {
-            for (next_loc, next_dir, cost) in self.siblings(loc, dir) {
-                if best_score.inc(next_loc, score + cost) {
-                    queue.push_back((next_loc, next_dir, score + cost));
+        let mut paths = HashMap::<usize, Vec<HashSet<Location>>>::new();
+
+        while let Some((path, score)) = queue.pop_front() {
+            let (loc, dir) = *path.last().unwrap();
+
+            if loc == self.end_loc {
+                let bucket = paths.entry(score).or_default();
+                let path = HashSet::from_iter(path.iter().map(|(l, _)| *l));
+                bucket.push(path);
+            }
+
+            for (next_loc, next_dir, cost) in self.moves(loc, dir) {
+                if best_score.inc((next_loc, next_dir), score + cost) {
+                    let mut next_path = path.clone();
+                    next_path.push((next_loc, next_dir));
+
+                    queue.push_back((next_path, score + cost));
                 }
             }
         }
 
-        best_score.get(self.end_loc).unwrap()
+        let score = best_score.min_for_loc(self.end_loc).unwrap();
+        let best_paths = paths.get(&score).unwrap();
+
+        let mut merged = HashSet::new();
+        for path in best_paths {
+            for loc in path.iter() {
+                merged.insert(*loc);
+            }
+        }
+
+        merged
     }
 
     fn try_move(&self, loc: Location, dir: Direction) -> Option<Location> {
@@ -226,19 +256,19 @@ impl Turn {
 }
 
 struct BestScore {
-    map: HashMap<Location, usize>,
+    map: HashMap<(Location, Direction), usize>,
 }
 
 impl BestScore {
-    fn new(start_loc: Location) -> Self {
+    fn new(start: (Location, Direction)) -> Self {
         let mut map = HashMap::new();
-        map.insert(start_loc, 0);
+        map.insert(start, 0);
         Self { map }
     }
 
-    fn inc(&mut self, loc: Location, new_value: usize) -> bool {
-        if let Some(value) = self.map.get_mut(&loc) {
-            if new_value < *value {
+    fn inc(&mut self, key: (Location, Direction), new_value: usize) -> bool {
+        if let Some(value) = self.map.get_mut(&key) {
+            if new_value <= *value {
                 *value = new_value;
                 true
             } else {
@@ -246,31 +276,41 @@ impl BestScore {
                 false
             }
         } else {
-            self.map.insert(loc, new_value);
+            self.map.insert(key, new_value);
             true
         }
     }
 
-    fn get(&self, loc: Location) -> Option<usize> {
-        self.map.get(&loc).copied()
+    fn get(&self, key: (Location, Direction)) -> Option<usize> {
+        self.map.get(&key).copied()
+    }
+
+    fn min_for_loc(&self, loc: Location) -> Option<usize> {
+        let up = self.get((loc, Direction::Up)).unwrap_or(usize::MAX);
+        let down = self.get((loc, Direction::Down)).unwrap_or(usize::MAX);
+        let left = self.get((loc, Direction::Left)).unwrap_or(usize::MAX);
+        let right = self.get((loc, Direction::Right)).unwrap_or(usize::MAX);
+
+        [up, down, left, right].into_iter().min()
     }
 }
 
 fn solve(input: &str) -> usize {
     let matrix = Matrix::parse(input);
-    matrix.get_best_path()
+    let path = matrix.get_best_paths();
+    path.len()
 }
 
 #[test]
 fn test1() {
     let input = include_str!("input_test1.txt");
     let output = solve(input);
-    assert_eq!(output, 7036);
+    assert_eq!(output, 45);
 }
 
 #[test]
 fn test2() {
     let input = include_str!("input_test2.txt");
     let output = solve(input);
-    assert_eq!(output, 11048);
+    assert_eq!(output, 64);
 }
