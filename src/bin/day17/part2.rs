@@ -1,10 +1,67 @@
+use std::collections::HashMap;
+
 fn main() {
+    let (_cycle_len, map) = find_cycle();
+
+    const TAPE: [usize; 16] = [2, 4, 1, 6, 7, 5, 4, 6, 1, 4, 5, 5, 0, 3, 3, 0];
+
+    fn recurse(rest: &[usize], n: usize, map: &HashMap<usize, Vec<usize>>) -> Option<usize> {
+        if rest.is_empty() {
+            let mut buf = vec![];
+            manual_sim(n, &mut buf);
+
+            if buf == TAPE {
+                return Some(n);
+            } else {
+                println!("Skipping {n}, it's malformed");
+                return None;
+            }
+        }
+
+        for next in map.get(rest.last().unwrap()).unwrap() {
+            let mut it = *next;
+            let jumps = if let Some(ks) = (n * 8).checked_sub(it) {
+                ks / 1024
+            } else {
+                0
+            };
+            it += jumps * 1024;
+            while it < n * 8 {
+                it += 1024;
+            }
+            if it / 8 == n {
+                // try
+                if let Some(deeper) = recurse(&rest[0..rest.len() - 1], it, map) {
+                    return Some(deeper);
+                }
+            }
+        }
+
+        None
+    }
+
+    let mut found = None;
+    for last in map.get(TAPE.last().unwrap()).unwrap() {
+        if let Some(n) = recurse(&TAPE[0..TAPE.len() - 1], *last, &map) {
+            found = Some(n);
+            break;
+        }
+    }
+
+    assert_eq!(found, Some(90938893795561));
+
     let input = include_str!("input.txt");
-    let output = solve(input);
-    println!("{}", output);
+    let (registers, program) = input.split_once("\n\n").unwrap();
+
+    let mut registers = Registers::parse(registers);
+    let program = Program::parse(program);
+    registers.a = found.unwrap();
+
+    let output = eval(registers, program);
+    assert_eq!(output, TAPE);
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 struct Registers {
     a: usize,
     b: usize,
@@ -28,7 +85,7 @@ impl Registers {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Program {
     instruction_pointer: usize,
     tape: Vec<usize>,
@@ -37,14 +94,15 @@ struct Program {
 impl Program {
     fn parse(input: &str) -> Self {
         let tape = input.trim().strip_prefix("Program: ").unwrap();
-        let tape = tape
+
+        let nums = tape
             .split(',')
             .map(|n| n.parse::<usize>().unwrap())
             .collect::<Vec<_>>();
 
         Self {
             instruction_pointer: 0,
-            tape,
+            tape: nums.clone(),
         }
     }
 
@@ -137,12 +195,7 @@ impl Operand {
     }
 }
 
-fn solve(input: &str) -> String {
-    let (registers, program) = input.split_once("\n\n").unwrap();
-
-    let mut registers = Registers::parse(registers);
-    let mut program = Program::parse(program);
-
+fn eval(mut registers: Registers, mut program: Program) -> Vec<usize> {
     let mut out = vec![];
 
     while let Some(Instruction {
@@ -180,7 +233,7 @@ fn solve(input: &str) -> String {
             }
             InstructionOpCode::Out => {
                 let arg = combo.resolve(&registers);
-                out.push(format!("{}", arg % 8));
+                out.push(arg % 8);
                 program.instruction_pointer += 2;
             }
             InstructionOpCode::Bdv => {
@@ -196,12 +249,71 @@ fn solve(input: &str) -> String {
         }
     }
 
-    out.join(",")
+    out
 }
 
-#[test]
-fn test1() {
-    let input = include_str!("input_test1.txt");
-    let output = solve(input);
-    assert_eq!(output, "4,6,3,5,6,3,5,2,1,0".to_string());
+fn manual_sim(a: usize, out: &mut Vec<usize>) {
+    // 2,4, 1,6, 7,5, 4,6, 1,4, 5,5, 0,3, 3,0
+
+    // 2 4 = bst 4 = bst A
+    // b = a % 8;
+
+    // 1 6 = bxl 6  <- always as literal
+    // b = (a % 8) ^ 6;
+
+    // 7 5 = cdv 5 = cdv B
+    // c = a / 2_usize.pow(((a % 8) ^ 6) as u32);
+
+    // 4 6 = bxc 6 <- doesn't care about operand
+    // b = ((a % 8) ^ 6) ^ (a / 2_usize.pow(((a % 8) ^ 6) as u32));
+
+    // 1 4 = bxl 4 <- always as literal
+    // let b2 = (((a % 8) ^ 6) ^ (a / 2_usize.pow(((a % 8) ^ 6) as u32))) ^ 4;
+
+    // 5 5 = out 5 = out B
+    out.push(print(a));
+
+    // 0 3 = adv 3
+    // let a2 = a / 8;
+
+    // 3 0 = jnz 0
+    if a / 8 == 0 {
+        // NOOP, exit
+    } else {
+        // repeat
+        manual_sim(a / 8, out);
+    }
+}
+
+fn print(a: usize) -> usize {
+    ((((a % 8) ^ 6) ^ (a / 2_usize.pow(((a % 8) ^ 6) as u32))) ^ 4) % 8
+}
+
+// To find X for given N so that print(X) = N
+// use any number from `map.get(N)` + cycle * any
+//
+fn find_cycle() -> (usize, HashMap<usize, Vec<usize>>) {
+    let mut seq = vec![];
+
+    for i in 0..10_000 {
+        seq.push(print(i));
+
+        if seq.len() > 20 && seq.last_chunk::<20>() == seq.first_chunk::<20>() {
+            // loop
+            let full_cycle = &seq[0..seq.len() - 20];
+
+            let length = full_cycle.len();
+            let mut map = HashMap::<usize, Vec<usize>>::new();
+            for (input, output) in full_cycle.iter().enumerate() {
+                map.entry(*output).or_default().push(input);
+            }
+            for value in map.values_mut() {
+                value.sort_unstable();
+            }
+
+            return (length, map);
+        }
+    }
+
+    panic!("faled to find a cycle")
 }
