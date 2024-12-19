@@ -147,8 +147,11 @@ path = "src/bin/day18/part2.rs"
 name = "191"
 path = "src/bin/day19/part1.rs"
 
+[[bin]]
+name = "192"
+path = "src/bin/day19/part2.rs"
+
 [dependencies]
 crossterm = "0.28.1"
 rayon = "1.10.0"
 regex = "1.11.1"
-primitive-types = "0.13.1"
