@@ -29,9 +29,9 @@ impl Location {
     fn cheating_candidates(self, rows_count: usize, cols_count: usize) -> Vec<Self> {
         let mut out = vec![];
 
-        for drow in -2_isize..=2 {
-            for dcol in -2_isize..=2 {
-                if drow.abs() + dcol.abs() == 2 {
+        for drow in -20_isize..=20 {
+            for dcol in -20_isize..=20 {
+                if drow.abs() + dcol.abs() <= 20 {
                     if let Some(next) = self.add(drow, dcol, rows_count, cols_count) {
                         out.push(next);
                     }
@@ -252,7 +252,7 @@ fn build_win_to_count_map(input: &str) -> HashMap<u32, usize> {
             if d2 == MAX_PATH {
                 continue;
             };
-            let cheated_score = d1 + d2 + 2;
+            let cheated_score = d1 + d2 + loc.distance(teleports_to) as u32;
             let Some(win) = initial_score.checked_sub(cheated_score) else {
                 continue;
             };
@@ -275,23 +275,27 @@ fn test1() {
     let mut pairs = output
         .into_iter()
         .map(|(win, count)| (count, win))
+        .filter(|(_, win)| *win >= 50)
         .collect::<Vec<_>>();
     pairs.sort_unstable_by_key(|(_count, win)| *win);
 
     assert_eq!(
         pairs,
         [
-            (14, 2),
-            (14, 4),
-            (2, 6),
-            (4, 8),
-            (2, 10),
-            (3, 12),
-            (1, 20),
-            (1, 36),
-            (1, 38),
-            (1, 40),
-            (1, 64),
+            (32, 50),
+            (31, 52),
+            (29, 54),
+            (39, 56),
+            (25, 58),
+            (23, 60),
+            (20, 62),
+            (19, 64),
+            (12, 66),
+            (14, 68),
+            (12, 70),
+            (22, 72),
+            (4, 74),
+            (3, 76),
         ]
     );
 
