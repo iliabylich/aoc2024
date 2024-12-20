@@ -128,6 +128,7 @@ fn find_all_fastest_paths_uncached(matrix: &Matrix, locations: &[Location]) -> V
         }
     }
 
+    #[allow(clippy::needless_range_loop)]
     for loc_id in 0..locations.len() {
         distance[loc_id][loc_id] = 0;
     }

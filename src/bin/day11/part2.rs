@@ -27,7 +27,7 @@ impl<'a> Writer<'a> {
     }
 }
 
-impl<'a> core::fmt::Write for Writer<'a> {
+impl core::fmt::Write for Writer<'_> {
     fn write_str(&mut self, s: &str) -> core::fmt::Result {
         let bytes = s.as_bytes();
 
