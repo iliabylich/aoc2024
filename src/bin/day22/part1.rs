@@ -46,7 +46,7 @@ fn solve(input: &str) -> u64 {
 
 #[test]
 fn test1() {
-    let input = include_str!("input_test.txt");
+    let input = include_str!("input_test1.txt");
     let output = solve(input);
     assert_eq!(output, 37327623);
 }
