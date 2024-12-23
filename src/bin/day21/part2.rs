@@ -153,7 +153,7 @@ fn solve(input: &str) -> usize {
 fn test1() {
     let input = include_str!("input_test.txt");
     let output = solve(input);
-    assert_eq!(output, 126384);
+    assert_eq!(output, 154115708116294);
 }
 
 #[derive(Debug)]

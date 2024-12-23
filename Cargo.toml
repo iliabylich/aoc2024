@@ -175,6 +175,10 @@ path = "src/bin/day22/part1.rs"
 name = "222"
 path = "src/bin/day22/part2.rs"
 
+[[bin]]
+name = "231"
+path = "src/bin/day23/part1.rs"
+
 [dependencies]
 crossterm = "0.28.1"
 itertools = "0.13.0"
